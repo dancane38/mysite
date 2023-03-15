@@ -1,0 +1,15 @@
+{% load static %}
+<link rel="stylesheet" href="{% static 'cameratrap/style.css' %}">
+
+
+Hello there!!
+
+{% if latest_video_files %}
+    <ul>
+    {% for video_file in latest_video_files %}
+        <li><a href="{% url 'cameratrap:detail' video_file.id %}">{{ video_file.filename }}</a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No Videos are available.</p>
+{% endif %}

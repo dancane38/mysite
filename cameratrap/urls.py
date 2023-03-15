@@ -2,8 +2,11 @@ from django.urls import path
 
 from cameratrap import views
 
+app_name = 'cameratrap'
 urlpatterns = [
-    path('', views.index, name='index'),
+    #path('', views.index, name='index'),
+    path('', views.IndexView.as_view(), name='index'),
+    path('<int:pk>/', views.DetailView.as_view(), name='detail'),
 ]
 
 #app_name = 'monkeyCT'

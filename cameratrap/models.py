@@ -1,6 +1,10 @@
 from django.db import models
 
 class VideoFile(models.Model):
+
+    def __str__(self):
+        return self.filename
+
     ct_id = models.CharField(max_length=20)
     site_id = models.CharField(max_length=20)
     date_start = models.DateTimeField('start date')

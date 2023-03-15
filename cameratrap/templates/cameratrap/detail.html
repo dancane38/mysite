@@ -1,0 +1,6 @@
+{% load static %}
+<link rel="stylesheet" href="{% static 'cameratrap/style.css' %}">
+
+<h1>Filename: {{ videoFile.filename }}</h1>
+
+<a href="{% url 'cameratrap:index' %}">Back to Home</a>
