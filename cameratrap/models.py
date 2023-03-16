@@ -5,16 +5,18 @@ class VideoFile(models.Model):
     def __str__(self):
         return self.filename
 
-    ct_id = models.CharField(max_length=20)
-    site_id = models.CharField(max_length=20)
-    date_start = models.DateTimeField('start date')
-    date_end = models.DateTimeField('end date')
-    filename = models.CharField(max_length=50)
-    video_id = models.CharField(max_length=20)
-    stratum = models.CharField(max_length=20)
-    rotation = models.CharField(max_length=20)
-    objects_detected = models.BooleanField()
+    ct_id = models.CharField(max_length=20, null=True)
+    site_id = models.CharField(max_length=20, null=True)
+    date_start = models.DateTimeField('start date', null=True)
+    date_end = models.DateTimeField('end date', null=True)
+    filename = models.CharField(max_length=50, null=True)
+    video_id = models.CharField(max_length=20, null=True)
+    stratum = models.CharField(max_length=20, null=True)
+    rotation = models.CharField(max_length=20, null=True)
+    objects_detected = models.BooleanField(default=False)
     max_confidence = models.IntegerField(default=0)
+    document = models.FileField(upload_to='media/', null=True)
+    uploaded_at = models.DateTimeField(auto_now_add=True, null=True)
 
 class Observation(models.Model):
     video_file = models.ForeignKey(VideoFile, on_delete=models.CASCADE)
@@ -45,3 +47,4 @@ class Prediction(models.Model):
     height = models.IntegerField(default=0)
     confidence = models.IntegerField(default=0)
     pred_class = models.CharField(max_length=255)
+

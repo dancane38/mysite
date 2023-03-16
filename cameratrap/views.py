@@ -3,7 +3,7 @@ from django.urls import reverse
 from django.views import generic
 from .models import VideoFile
 from django.utils import timezone
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, render, redirect
 from .forms import UploadFileForm
 
 #class IndexView(generic.View):
@@ -27,12 +27,16 @@ class DetailView(generic.DetailView):
     template_name = 'cameratrap/detail.html'
 
 
-def upload_file(request):
+
+def UploadFileView(request):
+    form = UploadFileForm()
     if request.method == 'POST':
         form = UploadFileForm(request.POST, request.FILES)
         if form.is_valid():
-            handle_uploaded_file(request.FILES['file'])
-            return HttpResponseRedirect('/success/url/')
+            form.save()
+            return redirect('cameratrap:index')
     else:
         form = UploadFileForm()
-    return render(request, 'upload.html', {'form': form})
+    return render(request, 'cameratrap/upload.html', {
+        'form': form
+    })

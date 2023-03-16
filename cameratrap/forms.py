@@ -1,5 +1,10 @@
 from django import forms
+from .models import VideoFile
 
-class UploadFileForm(forms.Form):
-    title = forms.CharField(max_length=50)
-    file = forms.FileField()
+class UploadFileForm(forms.ModelForm):
+    document = forms.FileField()
+
+    class Meta:
+        model = VideoFile
+        fields = ['document','ct_id', 'site_id', 'video_id']
+

@@ -1,8 +1,11 @@
 {% load static %}
 <link rel="stylesheet" href="{% static 'cameratrap/style.css' %}">
 
-
 Hello there!!
+
+<div>
+    <a href="{% url 'cameratrap:upload' %}">Upload new video</a>
+</div>
 
 {% if latest_video_files %}
     <ul>

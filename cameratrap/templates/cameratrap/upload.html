@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Upload File</title>
+    </head>
+    <body>
+        <div>Upload Video</div>
+        <div class="jumbotron">
+            {% block replace %}
+            <p class="lead">Here is where you upload a file</p>
+            <hr class="my-4">
+            <form method="POST" enctype="multipart/form-data">
+                <!-- Very Important csrf Token -->
+                {% csrf_token %}
+                <table>
+                    {{ form.as_table }}
+                </table>
+                 <button type="submit">Upload</button>
+        </div>
+        {% endblock %}
+    </body>
+</html>
