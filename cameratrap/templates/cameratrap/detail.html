@@ -3,4 +3,7 @@
 
 <h1>Filename: {{ videoFile.filename }}</h1>
 
+<a href="{% url 'cameratrap:process' videoFile.id %}">Process {{ videoFile.filename }}</a>
+<br/>
+
 <a href="{% url 'cameratrap:index' %}">Back to Home</a>

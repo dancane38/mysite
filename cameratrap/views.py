@@ -2,11 +2,14 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 from django.views import generic
 from .models import VideoFile
-from django.utils import timezone
 from django.shortcuts import get_object_or_404, render, redirect
 from .forms import UploadFileForm
 import logging
 from .VideoProcessor import VideoProcessor
+from asgiref.sync import sync_to_async
+import asyncio
+from time import sleep
+import shutil
 
 #class IndexView(generic.View):
 #    template_name = 'cameratrap/index.html'
@@ -39,9 +42,20 @@ def UploadFileView(request):
             logging.debug("file upload successful ")
             vp = VideoProcessor(new_video_file)
             vp.processVideo()
-            return redirect('cameratrap:index')
+            return redirect('cameratrap:process')
     else:
         form = UploadFileForm()
     return render(request, 'cameratrap/upload.html', {
         'form': form
     })
+
+async def AsyncProcessVideoView(request, video_pkid):
+
+    video_file = await sync_to_async(VideoFile.objects.get, thread_sensitive=True)(pk=video_pkid)
+    vp = VideoProcessor(video_file)
+    vp.processVideo()
+
+    #return HttpResponse("Non-blocking HTTP request (via sync_to_async)")
+    return HttpResponseRedirect(reverse('cameratrap:detail', args=(video_pkid,)))
+
+

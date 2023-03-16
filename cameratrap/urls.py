@@ -10,15 +10,9 @@ urlpatterns = [
     path('', views.IndexView.as_view(), name='index'),
     path('<int:pk>/', views.DetailView.as_view(), name='detail'),
     path('uploads/', views.UploadFileView, name='upload'),
+    path("<int:video_pkid>/process", views.AsyncProcessVideoView, name='process'),
 ]
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
-#app_name = 'monkeyCT'
-#urlpatterns = [
-#    path('', views.IndexView.as_view(), name='index'),
-#   path('<int:pk>/', views.DetailView.as_view(), name='detail'),
-#   path('<int:pk>/results/', views.ResultsView.as_view(), name='results'),
-#    path('<int:question_id>/vote/', views.vote, name='vote'),
-#]
