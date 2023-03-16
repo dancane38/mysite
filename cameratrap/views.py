@@ -5,6 +5,8 @@ from .models import VideoFile
 from django.utils import timezone
 from django.shortcuts import get_object_or_404, render, redirect
 from .forms import UploadFileForm
+import logging
+from .VideoProcessor import VideoProcessor
 
 #class IndexView(generic.View):
 #    template_name = 'cameratrap/index.html'
@@ -33,7 +35,10 @@ def UploadFileView(request):
     if request.method == 'POST':
         form = UploadFileForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save()
+            new_video_file = form.save()
+            logging.debug("file upload successful ")
+            vp = VideoProcessor(new_video_file)
+            vp.processVideo()
             return redirect('cameratrap:index')
     else:
         form = UploadFileForm()
