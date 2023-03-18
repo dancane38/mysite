@@ -42,7 +42,7 @@ def UploadFileView(request):
             logging.debug("file upload successful ")
             vp = VideoProcessor(new_video_file)
             vp.processVideo()
-            return redirect('cameratrap:process')
+            return redirect('cameratrap:process', new_video_file.pk)
     else:
         form = UploadFileForm()
     return render(request, 'cameratrap/upload.html', {

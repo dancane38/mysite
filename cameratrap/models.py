@@ -16,7 +16,7 @@ class VideoFile(models.Model):
     rotation = models.CharField(max_length=20, null=True, blank=True)
     objects_detected = models.BooleanField(default=False)
     max_confidence = models.IntegerField(default=0)
-    document = models.FileField(upload_to='media/', null=True)
+    document = models.FileField(upload_to='', null=True)
     uploaded_at = models.DateTimeField(auto_now_add=True, null=True)
 
     def save(self, *args, **kwargs):
