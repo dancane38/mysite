@@ -1,10 +1,17 @@
 from django.db import models
 import ntpath
+from django.utils.translation import gettext_lazy as _
 
 class VideoFile(models.Model):
 
     def __str__(self):
         return self.filename
+
+    class VideoStatus(models.TextChoices):
+        NONE = 'NON', _('None')
+        UPLOADED = 'UPL', _('Uploaded')
+        READY_FOR_PROCESSING = 'RDY', _('Ready for Processing')
+        PROCESSED = 'PRO', _('Processed')
 
     ct_id = models.CharField(max_length=20, null=True)
     site_id = models.CharField(max_length=20, null=True)
@@ -18,12 +25,22 @@ class VideoFile(models.Model):
     max_confidence = models.IntegerField(default=0)
     document = models.FileField(upload_to='', null=True)
     uploaded_at = models.DateTimeField(auto_now_add=True, null=True)
+    fps_video = models.IntegerField(null=True, blank=True)
+    fps_inference = models.IntegerField(null=True, blank=True)
+    video_status = models.CharField(max_length=3, choices=VideoStatus.choices, default=VideoStatus.NONE,)
+    inference_model = models.CharField(max_length=20, null=True, blank=True)
+    max_objects_detected = models.IntegerField(null=True, blank=True)
+    video_height = models.IntegerField(null=True, blank=True)
+    video_width = models.IntegerField(null=True, blank=True)
 
     def save(self, *args, **kwargs):
-        if (self.filename is None):
+        if self.filename is None:
             self.filename = ntpath.basename(self.document.path)
+        if self.max_objects_detected is not None and int(self.max_objects_detected) > 0:
+            self.objects_detected = True
 
         super(VideoFile, self).save(*args, **kwargs)
+
 
 class Observation(models.Model):
     video_file = models.ForeignKey(VideoFile, on_delete=models.CASCADE)

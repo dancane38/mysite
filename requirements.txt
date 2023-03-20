@@ -2,3 +2,4 @@ Django
 mysqlclient
 httpx
 ultralytics
+django-bootstrap-v5

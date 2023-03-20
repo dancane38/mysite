@@ -6,13 +6,6 @@ from django.shortcuts import get_object_or_404, render, redirect
 from .forms import UploadFileForm
 import logging
 from .VideoProcessor import VideoProcessor
-from asgiref.sync import sync_to_async
-import asyncio
-from time import sleep
-import shutil
-
-#class IndexView(generic.View):
-#    template_name = 'cameratrap/index.html'
 
 
 class IndexView(generic.ListView):
@@ -26,11 +19,11 @@ class IndexView(generic.ListView):
         """
         return VideoFile.objects.order_by('-date_start')[:5]
 
+
 class DetailView(generic.DetailView):
     model = VideoFile
     context_object_name = 'videoFile'
     template_name = 'cameratrap/detail.html'
-
 
 
 def UploadFileView(request):
@@ -49,13 +42,11 @@ def UploadFileView(request):
         'form': form
     })
 
-async def AsyncProcessVideoView(request, video_pkid):
 
-    video_file = await sync_to_async(VideoFile.objects.get, thread_sensitive=True)(pk=video_pkid)
+def AsyncProcessVideoView(request, video_pkid):
+    video_file = VideoFile.objects.get(pk=video_pkid)
     vp = VideoProcessor(video_file)
     vp.processVideo()
 
-    #return HttpResponse("Non-blocking HTTP request (via sync_to_async)")
+    # return HttpResponse("Non-blocking HTTP request (via sync_to_async)")
     return HttpResponseRedirect(reverse('cameratrap:detail', args=(video_pkid,)))
-
-
