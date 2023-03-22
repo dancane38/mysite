@@ -3,7 +3,55 @@
 
 <h1>Filename: {{ videoFile.filename }}</h1>
 
-<a href="{% url 'cameratrap:process' videoFile.id %}">Process {{ videoFile.filename }}</a>
+<a href="{% url 'cameratrap:process' videoFile.id %}">Reprocess {{ videoFile.filename }}</a>
 <br/>
 
 <a href="{% url 'cameratrap:index' %}">Back to Home</a>
+
+<div>
+    /media/{{ videoFile.document }}<br/>
+
+    <embed src=""/>
+
+</div>
+<table>
+    <tr>
+        <th>CT_ID - SITE_ID</th>
+        <td>{{ videoFile.ct_id }} - {{ videoFile.site_id }}</td>
+    </tr>
+    <tr>
+        <th>Video</th>
+        <td>{{ videoFile.filename }} ({{ videoFile.video_id }})</td>
+    </tr>
+    <tr>
+        <th>Video Metadata</th>
+        <td>{{ videoFile.video_width }} x {{ videoFile.video_height }} @ {{ videoFile.fps_video }} fps</td>
+    </tr>
+    <tr>
+        <th>Dates</th>
+        <td>{{ videoFile.date_start }} - {{ videoFile.date_end }}</td>
+    </tr>
+    <tr>
+        <th>Inference Status</th>
+        <td>Status: {{ videoFile.video_status }}<br/>
+            Objects Detected: {{ videoFile.objects_detected }} - {{ videoFile.max_objects_detected }}<br/>
+            Max Confidence: {{ videoFile.max_confidence }}<br/>
+            Details: Model:{{ videoFile.inference_model }}, IFPS: {{ videoFile.fps_inference }}<br/>
+        </td>
+    </tr>
+</table>
+
+<table>
+    <tr>
+        <th>Frame</th>
+        <th>Confidence</th>
+        <th></th>
+    </tr>
+    {% for vFrame in videoFile.videoframe_set.all %}
+        <tr>
+            <td>{{ vFrame.frame_number }}</td>
+            <td>{{ vFrame.max_confidence }}</td>
+            <td>{{ vFrame.filename }}</td>
+        </tr>
+    {% endfor %}
+</table>

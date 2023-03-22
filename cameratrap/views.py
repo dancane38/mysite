@@ -6,7 +6,7 @@ from django.shortcuts import get_object_or_404, render, redirect
 from .forms import UploadFileForm
 import logging
 from .VideoProcessor import VideoProcessor
-
+import ntpath
 
 class IndexView(generic.ListView):
     template_name = 'cameratrap/index.html'

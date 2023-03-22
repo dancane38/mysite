@@ -1,6 +1,7 @@
 from django.db import models
 import ntpath
 from django.utils.translation import gettext_lazy as _
+from django.utils.text import slugify
 
 class VideoFile(models.Model):
 
@@ -13,17 +14,20 @@ class VideoFile(models.Model):
         READY_FOR_PROCESSING = 'RDY', _('Ready for Processing')
         PROCESSED = 'PRO', _('Processed')
 
-    ct_id = models.CharField(max_length=20, null=True)
-    site_id = models.CharField(max_length=20, null=True)
+    def fn_video_location(instance, filename):
+        return '/'.join(['videos', slugify(instance.site_id), slugify(instance.ct_id), filename])
+
+    ct_id = models.CharField(max_length=20)
+    site_id = models.CharField(max_length=20)
     date_start = models.DateTimeField('start date', null=True, blank=True)
     date_end = models.DateTimeField('end date', null=True, blank=True)
-    filename = models.CharField(max_length=50, null=True)
+    filename = models.CharField(max_length=50, null=False)
     video_id = models.CharField(max_length=20, null=True)
     stratum = models.CharField(max_length=20, null=True, blank=True)
     rotation = models.CharField(max_length=20, null=True, blank=True)
     objects_detected = models.BooleanField(default=False)
     max_confidence = models.IntegerField(default=0)
-    document = models.FileField(upload_to='', null=True)
+    document = models.FileField(upload_to=fn_video_location, null=True)
     uploaded_at = models.DateTimeField(auto_now_add=True, null=True)
     fps_video = models.IntegerField(null=True, blank=True)
     fps_inference = models.IntegerField(null=True, blank=True)
@@ -34,7 +38,7 @@ class VideoFile(models.Model):
     video_width = models.IntegerField(null=True, blank=True)
 
     def save(self, *args, **kwargs):
-        if self.filename is None:
+        if self.filename is None or self.filename is '':
             self.filename = ntpath.basename(self.document.path)
         if self.max_objects_detected is not None and int(self.max_objects_detected) > 0:
             self.objects_detected = True
@@ -59,16 +63,16 @@ class Observation(models.Model):
 class VideoFrame(models.Model):
     video_file = models.ForeignKey(VideoFile, on_delete=models.CASCADE)
     frame_number = models.IntegerField(default=0)
-    objects_detected = models.BooleanField()
+    objects_detected = models.IntegerField(null=True, blank=True)
     filename = models.CharField(max_length=255)
     max_confidence = models.IntegerField(default=0)
 
 class Prediction(models.Model):
     video_frame = models.ForeignKey(VideoFrame, on_delete=models.CASCADE)
-    coord_x = models.IntegerField(default=0)
-    coord_y = models.IntegerField(default=0)
-    width = models.IntegerField(default=0)
-    height = models.IntegerField(default=0)
+    coord_top = models.IntegerField(default=0)
+    coord_left = models.IntegerField(default=0)
+    coord_bottom = models.IntegerField(default=0)
+    coord_right = models.IntegerField(default=0)
     confidence = models.IntegerField(default=0)
     pred_class = models.CharField(max_length=255)
 

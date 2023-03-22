@@ -2,15 +2,18 @@ import glob
 import logging
 import ntpath
 import os
-import subprocess
-from ultralytics import YOLO
-from PIL import Image
-from numpy import asarray
-from ultralytics.yolo.utils.plotting import Annotator
-from .models import VideoFile, VideoFrame, Prediction
 import re
+import subprocess
+
 import cv2
 import torch
+from PIL import Image
+from numpy import asarray
+from ultralytics import YOLO
+from ultralytics.yolo.utils.plotting import Annotator
+
+from .models import VideoFrame, Prediction
+
 
 def create_video_frames_dir(parent_dir, new_dir):
     path_full_dir = os.path.join(parent_dir, new_dir)
@@ -22,6 +25,8 @@ def create_video_frames_dir(parent_dir, new_dir):
 
 class VideoProcessor:
     PATH_TO_FFMPEG = "/opt/homebrew/bin/ffmpeg"
+    MODEL = "v10best.pt"
+    MIN_CONFIDENCE = 0.5
     FPS_INFERENECE = "2"  # change the video FPS processing rate
     FRAMES_DIR = "_frames"  # subdir for image frames of each video
     ANNOTATION_DIR = "_annotations"  # subdir of annotated frames
@@ -60,19 +65,22 @@ class VideoProcessor:
         logging.debug("- Filename: " + self.video_filename)
         logging.debug("- Frames Dir: " + self.path_frames_dir)
         logging.debug("- Annotation Dir: " + self.path_annotation_dir)
+        pass
 
     def saveVideoMetadata(self):
         cam = cv2.VideoCapture(self.path_to_video)
-        fps = cam.get(cv2.CAP_PROP_FPS) # float 'fps'
+        fps = cam.get(cv2.CAP_PROP_FPS)  # float 'fps'
         width = cam.get(cv2.CAP_PROP_FRAME_WIDTH)  # float `width`
         height = cam.get(cv2.CAP_PROP_FRAME_HEIGHT)  # float `height`
         fps_string = '{fpsString:.0f}'.format(fpsString=fps)
-        logging.debug("- Saving Video FPS as: "+ fps_string)
+        logging.debug("- Saving Video FPS as: " + fps_string)
         self.video_fps = fps
         self.videoFile.fps_video = round(fps)
         self.videoFile.video_width = width
         self.videoFile.video_height = height
         self.videoFile.fps_inference = self.FPS_INFERENECE
+        self.videoFile.video_status = self.videoFile.VideoStatus.PROCESSED
+        self.videoFile.inference_model = self.MODEL
         self.videoFile.save()
         pass
 
@@ -80,7 +88,7 @@ class VideoProcessor:
         logging.debug(" -- max_objects_detected is {max_obj:.0f}".format(max_obj=self.max_objects_detected_in_video))
         logging.debug(" -- max_confidence is {max_conf:.0f}".format(max_conf=self.max_confidence_in_video * 100))
         self.videoFile.max_objects_detected = self.max_objects_detected_in_video
-        self.videoFile.max_confidence = torch.round(self.max_confidence_in_video * 100)
+        self.videoFile.max_confidence = int(self.max_confidence_in_video * 100)
         self.videoFile.save()
         pass
 
@@ -91,7 +99,7 @@ class VideoProcessor:
         self.process_video_using_ffmpeg()
 
         # Load a model
-        model = YOLO('model/v10best.pt')  # load a pretrained model (recommended for training)
+        model = YOLO('model/'+ self.MODEL)  # load a pretrained model (recommended for training)
 
         # run inference on all images
         for filename in sorted(glob.glob(os.path.join(self.path_frames_dir, '*.jpg'))):
@@ -100,6 +108,8 @@ class VideoProcessor:
             # do your stuff
             logging.debug("- Running inference on image " + filename)
             self.run_inference(filename, model, img)
+
+        pass
 
     def process_video_using_ffmpeg(self):
         # ffmpeg -i input.mp4 -vf fps=15 frame%d.png
@@ -112,6 +122,7 @@ class VideoProcessor:
             print(err)
         else:
             print("- SUCCESS: FFmpeg Script Ran Successfully")
+        pass
 
     def run_inference(self, filename, model, img):
         img_as_numpy = asarray(img)
@@ -129,7 +140,6 @@ class VideoProcessor:
 
         results = model(img_as_numpy)  # generator of Results objects
         logging.debug("-- Inference Complete ")
-        # logging.debug(results)
 
         count_detections = 0
         for r in results:
@@ -138,21 +148,55 @@ class VideoProcessor:
             # probs = r.probs  # Class probabilities for classification outputs
             annotator = Annotator(img_as_numpy, line_width=1)
             if boxes is not None:
-                # VideoFrame vFrame = VideoFrame(video_file=self.videoFile, frame_number=, objects_detected=boxes.length, filename=filename)
-
+                frame_max_confidence = 0
                 for box in boxes:
                     b = box.xyxy[0]  # get box coordinates in (top, left, bottom, right) format
                     c = box.cls
                     conf = box.conf[0]
+                    if conf > self.MIN_CONFIDENCE:
+                        try:
+                            video_frame = VideoFrame.objects.get(video_file=self.videoFile,
+                                                                 frame_number=actual_frame_number)
+                        except VideoFrame.DoesNotExist:
+                            video_frame = VideoFrame(video_file=self.videoFile, frame_number=actual_frame_number)
 
-                    if conf > 0.5:
+                        video_frame.objects_detected = frame_number_of_objects = boxes.__len__()
+                        video_frame.filename = filename
+
                         count_detections += 1
-                        class_with_conf = '{label} - {con:.2f}%'.format(label=model.names[int(c)], con=conf * 100)
+                        classification = model.names[int(c)]
+                        conf_as_int = int(conf * 100)
+
+                        if conf_as_int > frame_max_confidence:
+                            video_frame.max_confidence = conf_as_int
+
+                        video_frame.save()
+
+                        class_with_conf = '{label} - {con:.2f}%'.format(label=classification, con=conf_as_int)
                         annotator.box_label(b, class_with_conf, color=(255, 0, 0))
+
+                        try:
+                            prediction = Prediction.objects.get(video_frame=video_frame,
+                                                                pred_class=classification,
+                                                                coord_top=torch.round(b[0]),
+                                                                coord_left=torch.round(b[1]),
+                                                                coord_bottom=torch.round(b[2]),
+                                                                coord_right=torch.round(b[3])
+                                                                )
+                        except Prediction.DoesNotExist:
+                            prediction = Prediction(video_frame=video_frame,
+                                                    pred_class=classification,
+                                                    coord_top=torch.round(b[0]),
+                                                    coord_left=torch.round(b[1]),
+                                                    coord_bottom=torch.round(b[2]),
+                                                    coord_right=torch.round(b[3])
+                                                    )
+
+                        prediction.confidence = conf_as_int
+                        prediction.save()
 
                         if conf > self.max_confidence_in_video:
                             self.max_confidence_in_video = conf
-
 
         if count_detections > 0:
             img_annotated = annotator.result()
@@ -161,8 +205,9 @@ class VideoProcessor:
             video_filename = ntpath.basename(filename)
             annotated_path_to_output = self.path_annotation_dir + "/" + video_filename
             image_final.save(annotated_path_to_output)
+            video_frame.filename = annotated_path_to_output
+            video_frame.save()
 
             if count_detections > self.max_objects_detected_in_video:
                 self.max_objects_detected_in_video = count_detections
-
-
+    pass
