@@ -1,9 +1,27 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <title>Upload File</title>
-    </head>
-    <body>
+<!doctype html>
+<html lang="en">
+{% load static %}
+
+{# Load the tag library #}
+{% load bootstrap5 %}
+
+{# Load CSS and JavaScript #}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+
+{# Display django.contrib.messages as Bootstrap alerts #}
+{% bootstrap_messages %}
+
+<head>
+    <link rel="stylesheet" href="{% static 'cameratrap/style.css' %}">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Upload File</title>
+</head>
+
+{% include 'cameratrap/navbar.html' %}
+
+<body>
+    <div class="container-lg">
         <div>Upload Video</div>
         <div class="jumbotron">
             {% block replace %}
@@ -15,8 +33,11 @@
                 <table>
                     {{ form.as_table }}
                 </table>
-                 <button type="submit">Upload</button>
+                <button type="submit">Upload</button>
+            </form>
         </div>
         {% endblock %}
-    </body>
+    </div>
+</body>
+
 </html>

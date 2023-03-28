@@ -1,57 +1,62 @@
+<!doctype html>
+<html lang="en">
 {% load static %}
-<link rel="stylesheet" href="{% static 'cameratrap/style.css' %}">
 
-<h1>Filename: {{ videoFile.filename }}</h1>
+{# Load the tag library #}
+{% load bootstrap5 %}
 
-<a href="{% url 'cameratrap:process' videoFile.id %}">Reprocess {{ videoFile.filename }}</a>
-<br/>
+{# Load CSS and JavaScript #}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
 
-<a href="{% url 'cameratrap:index' %}">Back to Home</a>
+{# Display django.contrib.messages as Bootstrap alerts #}
+{% bootstrap_messages %}
 
-<div>
-    /media/{{ videoFile.document }}<br/>
+<head>
+    <link rel="stylesheet" href="{% static 'cameratrap/style.css' %}">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
 
-    <embed src=""/>
+<body>
 
-</div>
-<table>
-    <tr>
-        <th>CT_ID - SITE_ID</th>
-        <td>{{ videoFile.ct_id }} - {{ videoFile.site_id }}</td>
-    </tr>
-    <tr>
-        <th>Video</th>
-        <td>{{ videoFile.filename }} ({{ videoFile.video_id }})</td>
-    </tr>
-    <tr>
-        <th>Video Metadata</th>
-        <td>{{ videoFile.video_width }} x {{ videoFile.video_height }} @ {{ videoFile.fps_video }} fps</td>
-    </tr>
-    <tr>
-        <th>Dates</th>
-        <td>{{ videoFile.date_start }} - {{ videoFile.date_end }}</td>
-    </tr>
-    <tr>
-        <th>Inference Status</th>
-        <td>Status: {{ videoFile.video_status }}<br/>
-            Objects Detected: {{ videoFile.objects_detected }} - {{ videoFile.max_objects_detected }}<br/>
+{% include 'cameratrap/navbar.html' %}
+
+<div class="container-lg">
+
+    <div class="header1">
+        {{ videoFile.ct_id }} - {{ videoFile.site_id }} - {{ videoFile.filename }} ({{ videoFile.video_id }}) - Max Confidence {{ videoFile.max_confidence }}%
+    </div>
+
+    <div class="leftPane">
+        <div class="embed-responsive embed-responsive-16by9">
+            <video width="640" height="360" controls="true" preload="auto" id="oVideo">
+              <source src="{{ videoFile.document.url }}" type="video/mp4"/>
+            Your browser does not support the video tag.
+            </video>
+        </div>
+        <div class="videoData">
+            {{ videoFile.date_start }} - {{ videoFile.date_end }} {{ videoFile.video_width }} x {{ videoFile.video_height }} @ {{ videoFile.fps_video }} fps
+        </div>
+        <div class="videoMetadata">
+            Status: {{ videoFile.video_status }}<br/>
+            Objects Detected: {{ videoFile.objects_detected }} <br/>
+            Max Objects: {{ videoFile.max_objects_detected }}<br/>
             Max Confidence: {{ videoFile.max_confidence }}<br/>
-            Details: Model:{{ videoFile.inference_model }}, IFPS: {{ videoFile.fps_inference }}<br/>
-        </td>
-    </tr>
-</table>
+            Model:{{ videoFile.inference_model }}<br/>
+            IFPS: {{ videoFile.fps_inference }}<br/>
+        </div>
+    </div>
 
-<table>
-    <tr>
-        <th>Frame</th>
-        <th>Confidence</th>
-        <th></th>
-    </tr>
-    {% for vFrame in videoFile.videoframe_set.all %}
-        <tr>
-            <td>{{ vFrame.frame_number }}</td>
-            <td>{{ vFrame.max_confidence }}</td>
-            <td>{{ vFrame.filename }}</td>
-        </tr>
-    {% endfor %}
-</table>
+    <div class="rightPane">
+        {% for vFrame in videoFile.videoframe_set.all|dictsortreversed:"max_confidence" %}
+            <div class="vFrameHolder">
+                <a href="#" id="linkJumpToFrame_{{ vFrame.pk }}" onclick="document.getElementById('oVideo').currentTime={{ vFrame.videoTimestamp }}">
+                    <img height=256 src="{{ vFrame.filename.url }}"/><br/>
+                </a>
+                <div class="frameMetadata">Frame {{ vFrame.frame_number }} - Confidence: {{ vFrame.max_confidence }}%</div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <a href="{% url 'cameratrap:process' videoFile.id %}">Reprocess {{ videoFile.filename }}</a>
+</div>

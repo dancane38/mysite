@@ -64,9 +64,11 @@ class VideoFrame(models.Model):
     video_file = models.ForeignKey(VideoFile, on_delete=models.CASCADE)
     frame_number = models.IntegerField(default=0)
     objects_detected = models.IntegerField(null=True, blank=True)
-    filename = models.CharField(max_length=255)
+    filename = models.FileField()
     max_confidence = models.IntegerField(default=0)
 
+    def videoTimestamp(self):
+        return self.frame_number / self.video_file.fps_video
 class Prediction(models.Model):
     video_frame = models.ForeignKey(VideoFrame, on_delete=models.CASCADE)
     coord_top = models.IntegerField(default=0)

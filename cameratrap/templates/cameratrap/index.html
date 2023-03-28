@@ -1,18 +1,41 @@
-
+<!doctype html>
+<html lang="en">
 {% load static %}
-<link rel="stylesheet" href="{% static 'cameratrap/style.css' %}">
-Hello there!!
 
-<div>
-    <a href="{% url 'cameratrap:upload' %}">Upload new video</a>
+{# Load the tag library #}
+{% load bootstrap5 %}
+
+{# Load CSS and JavaScript #}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+
+{# Display django.contrib.messages as Bootstrap alerts #}
+{% bootstrap_messages %}
+
+<head>
+    <link rel="stylesheet" href="{% static 'cameratrap/style.css' %}">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+
+<body>
+
+{% include 'cameratrap/navbar.html' %}
+
+<div class="container-lg">
+    {% if latest_video_files %}
+        <ul>
+        {% for video_file in latest_video_files %}
+            <li>
+                <a href="{% url 'cameratrap:detail' video_file.id %}">{{ video_file.filename }}</a> -
+                Confidence: {{ video_file.max_confidence }}%
+            </li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>No Videos are available.</p>
+    {% endif %}
 </div>
 
-{% if latest_video_files %}
-    <ul>
-    {% for video_file in latest_video_files %}
-        <li><a href="{% url 'cameratrap:detail' video_file.id %}">{{ video_file.filename }}</a></li>
-    {% endfor %}
-    </ul>
-{% else %}
-    <p>No Videos are available.</p>
-{% endif %}
+</body>
+
+</html>

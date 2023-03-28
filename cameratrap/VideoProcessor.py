@@ -27,7 +27,7 @@ class VideoProcessor:
     PATH_TO_FFMPEG = "/opt/homebrew/bin/ffmpeg"
     MODEL = "v10best.pt"
     MIN_CONFIDENCE = 0.5
-    FPS_INFERENECE = "2"  # change the video FPS processing rate
+    FPS_INFERENECE = "6"  # change the video FPS processing rate
     FRAMES_DIR = "_frames"  # subdir for image frames of each video
     ANNOTATION_DIR = "_annotations"  # subdir of annotated frames
 
@@ -43,6 +43,7 @@ class VideoProcessor:
     def __init__(self, videoFile):
         self.videoFile = videoFile
         self.pattern_frame_number = re.compile('.*frame(\d+)', re.IGNORECASE)
+        self.pattern_media = re.compile('.*media/(.*)', re.IGNORECASE)
 
     def processVideo(self):
         logging.debug("-=-=-=-=-=-=-=-=-=-=-=-= start process video -=-=-=-=-=-=-=-=-=-=-=-=")
@@ -135,8 +136,8 @@ class VideoProcessor:
         logging.debug(" -- Video FPS is {fps:.0f}".format(fps=self.video_fps))
         logging.debug(" -- FPS_INFERENECE is " + self.FPS_INFERENECE)
         logging.debug(" -- FPS Factor is {fps:.0f}".format(fps=fps_factor))
-        actual_frame_number = int(frame_number) * fps_factor
-        logging.debug(" -- Computer video frame is {act_fps:.0f}".format(act_fps=actual_frame_number))
+        actual_frame_number = int(frame_number) * self.FPS_INFERENECE
+        logging.debug(" -- Computer video frame is {act_fps}".format(act_fps=actual_frame_number))
 
         results = model(img_as_numpy)  # generator of Results objects
         logging.debug("-- Inference Complete ")
@@ -205,7 +206,10 @@ class VideoProcessor:
             video_filename = ntpath.basename(filename)
             annotated_path_to_output = self.path_annotation_dir + "/" + video_filename
             image_final.save(annotated_path_to_output)
-            video_frame.filename = annotated_path_to_output
+            m_path_to_framefile = self.pattern_media.match(annotated_path_to_output)
+            frame_file_path = m_path_to_framefile.group(1)
+
+            video_frame.filename = frame_file_path
             video_frame.save()
 
             if count_detections > self.max_objects_detected_in_video:

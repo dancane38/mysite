@@ -2,6 +2,32 @@ li a {
     color: green;
 }
 
-body {
-    background: #EEEEEE;
+div.header1 {
+    font-size: 24pt;
+    font-weight: bold;
+}
+
+div.leftPane {
+    float: left;
+}
+
+div.rightPane {
+    margin-left: 700px;
+}
+
+
+div.videoData {
+    font-size: 10pt;
+    color: darkblue;
+}
+div.videoMetadata {
+    font-size: 10pt;
+    color: darkgrey;
+}
+div.frameMetadata {
+    font-size: 10pt;
+    color: #333333;
+}
+div.vFrameHolder {
+    margin-bottom: 20px;
 }
