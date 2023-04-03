@@ -6,5 +6,5 @@ class UploadFileForm(forms.ModelForm):
 
     class Meta:
         model = VideoFile
-        fields = ['document','ct_id', 'site_id', 'video_id']
+        fields = ['document','ct_id', 'site_id']
 

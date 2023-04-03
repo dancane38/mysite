@@ -68,7 +68,7 @@ class VideoFrame(models.Model):
     max_confidence = models.IntegerField(default=0)
 
     def videoTimestamp(self):
-        return self.frame_number / self.video_file.fps_video
+        return self.frame_number / self.video_file.fps_inference
 class Prediction(models.Model):
     video_frame = models.ForeignKey(VideoFrame, on_delete=models.CASCADE)
     coord_top = models.IntegerField(default=0)

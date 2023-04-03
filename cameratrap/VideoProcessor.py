@@ -136,8 +136,6 @@ class VideoProcessor:
         logging.debug(" -- Video FPS is {fps:.0f}".format(fps=self.video_fps))
         logging.debug(" -- FPS_INFERENECE is " + self.FPS_INFERENECE)
         logging.debug(" -- FPS Factor is {fps:.0f}".format(fps=fps_factor))
-        actual_frame_number = int(frame_number) * self.FPS_INFERENECE
-        logging.debug(" -- Computer video frame is {act_fps}".format(act_fps=actual_frame_number))
 
         results = model(img_as_numpy)  # generator of Results objects
         logging.debug("-- Inference Complete ")
@@ -157,9 +155,9 @@ class VideoProcessor:
                     if conf > self.MIN_CONFIDENCE:
                         try:
                             video_frame = VideoFrame.objects.get(video_file=self.videoFile,
-                                                                 frame_number=actual_frame_number)
+                                                                 frame_number=frame_number)
                         except VideoFrame.DoesNotExist:
-                            video_frame = VideoFrame(video_file=self.videoFile, frame_number=actual_frame_number)
+                            video_frame = VideoFrame(video_file=self.videoFile, frame_number=frame_number)
 
                         video_frame.objects_detected = frame_number_of_objects = boxes.__len__()
                         video_frame.filename = filename
