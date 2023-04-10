@@ -13,13 +13,8 @@ from cameratrap.tasks import process_video_async
 class IndexView(generic.ListView):
     template_name = 'cameratrap/index.html'
     context_object_name = 'latest_video_files'
-
-    def get_queryset(self):
-        """
-        Return the last five published questions (not including those set to be
-        published in the future).
-        """
-        return VideoFile.objects.order_by('-date_start')[:20]
+    model = VideoFile
+    paginate_by = 5
 
 
 class DetailView(generic.DetailView):
