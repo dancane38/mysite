@@ -15,6 +15,7 @@ class IndexView(generic.ListView):
     context_object_name = 'latest_video_files'
     model = VideoFile
     paginate_by = 5
+    ordering = ['-uploaded_at']
 
 
 class DetailView(generic.DetailView):
