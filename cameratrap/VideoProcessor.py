@@ -80,7 +80,7 @@ class VideoProcessor:
         self.videoFile.video_width = width
         self.videoFile.video_height = height
         self.videoFile.fps_inference = self.FPS_INFERENECE
-        self.videoFile.video_status = self.videoFile.VideoStatus.PROCESSED
+        self.videoFile.video_status = self.videoFile.VideoStatus.PROCESSING
         self.videoFile.inference_model = self.MODEL
         self.videoFile.save()
         pass
@@ -90,6 +90,7 @@ class VideoProcessor:
         logging.debug(" -- max_confidence is {max_conf:.0f}".format(max_conf=self.max_confidence_in_video * 100))
         self.videoFile.max_objects_detected = self.max_objects_detected_in_video
         self.videoFile.max_confidence = int(self.max_confidence_in_video * 100)
+        self.videoFile.video_status = self.videoFile.VideoStatus.COMPLETED
         self.videoFile.save()
         pass
 

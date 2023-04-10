@@ -1,0 +1,2 @@
+#  celery -A tasks worker --loglevel=INFO
+python -m celery -A cameratrap.ctcelery:app  worker -l debug

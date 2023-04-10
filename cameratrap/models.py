@@ -11,8 +11,13 @@ class VideoFile(models.Model):
     class VideoStatus(models.TextChoices):
         NONE = 'NON', _('None')
         UPLOADED = 'UPL', _('Uploaded')
-        READY_FOR_PROCESSING = 'RDY', _('Ready for Processing')
-        PROCESSED = 'PRO', _('Processed')
+        PROCESSING = 'PRO', _('Processing')
+        REPROCESS = 'REP', _('Flagged for Reprocessing')
+        COMPLETED = 'CPL', _('Completed')
+
+    def video_status_readable(self) -> VideoStatus:
+        # Get value from choices enum
+        return self.VideoStatus(self.video_status).label
 
     def fn_video_location(instance, filename):
         return '/'.join(['videos', slugify(instance.site_id), slugify(instance.ct_id), filename])

@@ -10,7 +10,8 @@ urlpatterns = [
     path('', views.IndexView.as_view(), name='index'),
     path('<int:pk>/', views.DetailView.as_view(), name='detail'),
     path('uploads/', views.UploadFileView, name='upload'),
-    path("<int:video_pkid>/process", views.AsyncProcessVideoView, name='process'),
+    path("<int:video_pkid>/process", views.SyncProcessVideoView, name='process'),
+    path("<int:video_pkid>/asyncprocess", views.ASyncProcessVideoView, name='asyncprocess'),
 ]
 
 if settings.DEBUG:

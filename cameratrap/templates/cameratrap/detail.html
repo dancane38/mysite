@@ -58,5 +58,8 @@
         {% endfor %}
     </div>
 
-    <a href="{% url 'cameratrap:process' videoFile.id %}">Reprocess {{ videoFile.filename }}</a>
+<div style="clear:both"></div>
+<hr/>
+    <a href="{% url 'cameratrap:process' videoFile.id %}">Reprocess {{ videoFile.filename }} Sync</a><br/>
+    <a href="{% url 'cameratrap:asyncprocess' videoFile.id %}">Reprocess {{ videoFile.filename }} Async</a>
 </div>

@@ -7,6 +7,8 @@ from .forms import UploadFileForm
 import logging
 from .VideoProcessor import VideoProcessor
 import ntpath
+from time import sleep
+from cameratrap.tasks import process_video_async
 
 class IndexView(generic.ListView):
     template_name = 'cameratrap/index.html'
@@ -17,7 +19,7 @@ class IndexView(generic.ListView):
         Return the last five published questions (not including those set to be
         published in the future).
         """
-        return VideoFile.objects.order_by('-date_start')[:5]
+        return VideoFile.objects.order_by('-date_start')[:20]
 
 
 class DetailView(generic.DetailView):
@@ -33,9 +35,11 @@ def UploadFileView(request):
         if form.is_valid():
             new_video_file = form.save()
             logging.debug("file upload successful ")
-            vp = VideoProcessor(new_video_file)
-            vp.processVideo()
-            return redirect('cameratrap:process', new_video_file.pk)
+            new_video_file.video_status = VideoFile.VideoStatus.UPLOADED
+            new_video_file.save()
+            logging.debug(f"processing video in the background with pkid: {new_video_file.pk}")
+            process_video_async.delay(new_video_file.pk)
+            return redirect('cameratrap:index')
     else:
         form = UploadFileForm()
     return render(request, 'cameratrap/upload.html', {
@@ -43,10 +47,17 @@ def UploadFileView(request):
     })
 
 
-def AsyncProcessVideoView(request, video_pkid):
+def SyncProcessVideoView(request, video_pkid):
+    print("Sync SyncProcessVideoView Called")
     video_file = VideoFile.objects.get(pk=video_pkid)
     vp = VideoProcessor(video_file)
     vp.processVideo()
+    print("Sync SyncProcessVideoView Completed")
+    return HttpResponseRedirect(reverse('cameratrap:detail', args=(video_pkid,)))
 
-    # return HttpResponse("Non-blocking HTTP request (via sync_to_async)")
+
+def ASyncProcessVideoView(request, video_pkid):
+    print("ASync ASyncProcessVideoView Called")
+    process_video_async.delay(video_pkid)
+    print("ASync ASyncProcessVideoView Completed")
     return HttpResponseRedirect(reverse('cameratrap:detail', args=(video_pkid,)))

@@ -27,7 +27,7 @@
         {% for video_file in latest_video_files %}
             <li>
                 <a href="{% url 'cameratrap:detail' video_file.id %}">{{ video_file.filename }}</a> -
-                Confidence: {{ video_file.max_confidence }}%
+                Confidence: {{ video_file.max_confidence }}% - {{  video_file.video_status_readable }}
             </li>
         {% endfor %}
         </ul>
