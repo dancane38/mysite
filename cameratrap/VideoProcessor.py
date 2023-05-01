@@ -9,6 +9,7 @@ import cv2
 import torch
 from PIL import Image
 from numpy import asarray
+from natsort import natsorted
 from ultralytics import YOLO
 from ultralytics.yolo.utils.plotting import Annotator
 
@@ -105,7 +106,7 @@ class VideoProcessor:
         # Load a model
         model = YOLO('model/'+ self.MODEL)  # load a pretrained model (recommended for training)
 
-        frames_in_video = sorted(glob.glob(os.path.join(self.path_frames_dir, '*.jpg')))
+        frames_in_video = natsorted(glob.glob(os.path.join(self.path_frames_dir, '*.jpg')))
         # run inference on all images
         i_count = 0
         for filename in frames_in_video:

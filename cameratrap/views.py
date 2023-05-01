@@ -28,13 +28,19 @@ def UploadFileView(request):
     form = UploadFileForm()
     if request.method == 'POST':
         form = UploadFileForm(request.POST, request.FILES)
+        files = request.FILES.getlist("document")
         if form.is_valid():
-            new_video_file = form.save()
-            logging.debug("file upload successful ")
-            new_video_file.video_status = VideoFile.VideoStatus.UPLOADED
-            new_video_file.save()
-            logging.debug(f"processing video in the background with pkid: {new_video_file.pk}")
-            process_video_async.delay(new_video_file.pk)
+            for f in files:
+                #new_video_file = form.save()
+                logging.debug("file upload successful ")
+                instance = VideoFile(document=f)
+                instance.ct_id = form.cleaned_data.get("ct_id")
+                instance.site_id = form.cleaned_data.get("site_id")
+                instance.video_status = VideoFile.VideoStatus.UPLOADED
+                instance.save()
+
+                logging.debug(f"processing video in the background with pkid: {instance.pk}")
+                process_video_async.delay(instance.pk)
             return redirect('cameratrap:index')
     else:
         form = UploadFileForm()
