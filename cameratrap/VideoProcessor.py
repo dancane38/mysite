@@ -12,6 +12,7 @@ from numpy import asarray
 from ultralytics import YOLO
 from ultralytics.yolo.utils.plotting import Annotator
 
+from .OCRUtils import OCRUtils
 from .models import VideoFrame, Prediction
 
 
@@ -39,6 +40,7 @@ class VideoProcessor:
     path_annotation_dir = ""
     max_objects_detected_in_video = 0
     max_confidence_in_video = 0
+    max_inference_frames = 0
 
     def __init__(self, videoFile):
         self.videoFile = videoFile
@@ -103,14 +105,33 @@ class VideoProcessor:
         # Load a model
         model = YOLO('model/'+ self.MODEL)  # load a pretrained model (recommended for training)
 
+        frames_in_video = sorted(glob.glob(os.path.join(self.path_frames_dir, '*.jpg')))
         # run inference on all images
-        for filename in sorted(glob.glob(os.path.join(self.path_frames_dir, '*.jpg'))):
+        i_count = 0
+        for filename in frames_in_video:
             img = Image.open(filename)
 
             # do your stuff
             logging.debug("- Running inference on image " + filename)
             self.run_inference(filename, model, img)
 
+            if i_count == 0:
+                logging.debug("capture the start date of the video")
+                img_as_numpy = asarray(img)
+                ocrUtil = OCRUtils(image=img_as_numpy)
+                dt_start = ocrUtil.extractDateTime()
+                logging.debug('First Date and Time Found is: {0}'.format(dt_start))
+                self.videoFile.date_start = dt_start
+
+            if i_count == len(frames_in_video)-1:
+                logging.debug("capture the end date of the video")
+                img_as_numpy = asarray(img)
+                ocrUtil = OCRUtils(image=img_as_numpy)
+                dt_end = ocrUtil.extractDateTime()
+                logging.debug('Last Date and Time Found is: {0}'.format(dt_end))
+                self.videoFile.date_end = dt_end
+
+            i_count = i_count + 1
         pass
 
     def process_video_using_ffmpeg(self):
