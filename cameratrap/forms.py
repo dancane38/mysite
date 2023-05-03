@@ -3,7 +3,7 @@ from .models import VideoFile
 
 class UploadFileForm(forms.ModelForm):
     document = forms.FileField(
-        widget=forms.ClearableFileInput(attrs={"multiple": True})
+        widget=forms.ClearableFileInput(attrs={"multiple": True })
     )
 
     class Meta:
