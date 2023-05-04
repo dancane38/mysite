@@ -1,0 +1,11 @@
+# port
+#uwsgi --http :8001 --module mysite.wsgi
+
+#socket - from venv python terminal
+#uwsgi --socket mysite.sock --module mysite.wsgi --chmod-socket=664
+
+# best way - use the .ini file
+uwsgi --ini mysite_uwsgi.ini
+
+# then after uwsgi start ngnix
+brew services restart nginx
