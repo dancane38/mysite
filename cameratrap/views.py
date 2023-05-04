@@ -14,7 +14,7 @@ class IndexView(generic.ListView):
     template_name = 'cameratrap/index.html'
     context_object_name = 'latest_video_files'
     model = VideoFile
-    paginate_by = 5
+    paginate_by = 25
     ordering = ['-uploaded_at']
 
 

@@ -4,3 +4,5 @@ ffmpeg
 imagemagik
 rabbitmq
 redis
+#uwsgi <- sits between client and server
+#nginx <- web server (brew services restart nginx on mac)

@@ -27,7 +27,7 @@ def create_video_frames_dir(parent_dir, new_dir):
 
 class VideoProcessor:
     PATH_TO_FFMPEG = "/opt/homebrew/bin/ffmpeg"
-    MODEL = "v10best.pt"
+    MODEL = "v14.pt"
     MIN_CONFIDENCE = 0.5
     FPS_INFERENECE = "6"  # change the video FPS processing rate
     FRAMES_DIR = "_frames"  # subdir for image frames of each video
