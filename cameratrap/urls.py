@@ -12,6 +12,7 @@ urlpatterns = [
     path('uploads/', views.UploadFileView, name='upload'),
     path("<int:video_pkid>/process", views.SyncProcessVideoView, name='process'),
     path("<int:video_pkid>/asyncprocess", views.ASyncProcessVideoView, name='asyncprocess'),
+    path("<int:video_pkid>/<int:video_frame_pkid>/coco", views.CocoVideoFrameView, name='coco'),
 ]
 
 if settings.DEBUG:

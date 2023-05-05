@@ -53,7 +53,12 @@
                 <a href="#" id="linkJumpToFrame_{{ vFrame.pk }}" onclick="document.getElementById('oVideo').currentTime={{ vFrame.videoTimestamp }}">
                     <img height=256 src="{{ vFrame.filename.url }}"/><br/>
                 </a>
-                <div class="frameMetadata">Frame {{ vFrame.frame_number }} - ({{ vFrame.videoTimestampFormatted }}) - Confidence: {{ vFrame.max_confidence }}%</div>
+                <div class="frameMetadata">
+                    Frame {{ vFrame.frame_number }} - ({{ vFrame.videoTimestampFormatted }}) -
+                    Confidence: {{ vFrame.max_confidence }}%
+                    <a href="{% url 'cameratrap:coco' videoFile.id vFrame.id%}">CoCo</a> -
+
+                </div>
             </div>
         {% endfor %}
     </div>

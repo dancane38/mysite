@@ -1,14 +1,13 @@
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 from django.views import generic
-from .models import VideoFile
+from .models import VideoFile, VideoFrame
 from django.shortcuts import get_object_or_404, render, redirect
 from .forms import UploadFileForm
 import logging
 from .VideoProcessor import VideoProcessor
-import ntpath
-from time import sleep
 from cameratrap.tasks import process_video_async
+from .CocoUtils import CocoUtils
 
 class IndexView(generic.ListView):
     template_name = 'cameratrap/index.html'
@@ -62,4 +61,13 @@ def ASyncProcessVideoView(request, video_pkid):
     print("ASync ASyncProcessVideoView Called")
     process_video_async.delay(video_pkid)
     print("ASync ASyncProcessVideoView Completed")
+    return HttpResponseRedirect(reverse('cameratrap:detail', args=(video_pkid,)))
+
+
+def CocoVideoFrameView(request, video_pkid, video_frame_pkid):
+    print("CocoVideoFrameView Called")
+    video_frame = VideoFrame.objects.get(pk=video_frame_pkid)
+    coco_util = CocoUtils(video_frame)
+    coco_util.process_frame_to_coco()
+    print("CocoVideoFrameView Completed")
     return HttpResponseRedirect(reverse('cameratrap:detail', args=(video_pkid,)))

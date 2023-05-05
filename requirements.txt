@@ -13,3 +13,5 @@ redis
 exif
 dateparser
 natsort
+coco-lib
+roboflow
