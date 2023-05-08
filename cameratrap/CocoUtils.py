@@ -3,9 +3,8 @@ from coco_lib.objectdetection import ObjectDetectionAnnotation, ObjectDetectionC
 from datetime import datetime
 from .models import VideoFrame, Prediction
 import logging
-import glob
-import os
 from roboflow import Roboflow
+from django.conf import settings
 
 
 class CocoUtils:
@@ -29,7 +28,7 @@ class CocoUtils:
 
         ## DEFINITIONS
         # roboflow params
-        api_key = "7NFZ6rPnodFibw7bIQG9"
+        api_key = settings.RF_PW
         upload_project_name = "monkeyct"
 
         ## INITIALIZATION
@@ -39,8 +38,15 @@ class CocoUtils:
 
         ## MAIN
         # upload images
+        image_to_upload = self.videoFrame.filename.path.replace("annotations", "frames")
+        coco_json_to_upload = self.COCO_JSON_FILENAME
+
         logging.debug("Image Filename is: ")
-        response = upload_project.upload(self.videoFrame.filename.path, self.COCO_JSON_FILENAME)
+        logging.debug(image_to_upload)
+        logging.debug("COCO_JSON_FILENAME Filename is: ")
+        logging.debug(coco_json_to_upload)
+
+        response = upload_project.upload(image_to_upload, coco_json_to_upload)
         logging.debug("Roboflow Response:")
         logging.debug(response)
 
@@ -100,7 +106,7 @@ class CocoUtils:
                 category_id=0,
                 segmentation=[],
                 area=800.0,
-                bbox=[posx, posy, bbox_width, bbox_height],
+                bbox=[posy, posx, bbox_width, bbox_height],
                 iscrowd=0
             )
 
